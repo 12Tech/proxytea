@@ -21,3 +21,12 @@ You can follow the official instructions at [AWS](https://docs.aws.amazon.com/cl
 
 
 
+## How to deploy?
+
+An S3 bucket to store the deployment code is required.
+
+```sh
+$> git clone git@github.com:12Tech/proxytea.git
+$> cd proxytea/src/proxy
+$> sam deploy --debug --s3-bucket DEPLOYMENT_BUCKET --force-upload --stack-name proxytea
+```
