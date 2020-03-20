@@ -30,3 +30,15 @@ $> git clone git@github.com:12Tech/proxytea.git
 $> cd proxytea/src/proxy
 $> sam deploy --debug --s3-bucket DEPLOYMENT_BUCKET --force-upload --stack-name YOUR_STACK_NAME
 ```
+
+Once the stack is correctly deployed, the API Gateway Endpoint will be shown.
+
+## How to use it?
+
+```sh
+$> cd proxytea/src/pytea
+$> python tea.py -u http://YOUR_LOCAL_SERVICE:PORT -q https://QUEUE_URL
+```
+
+The agent will start forwarding requests from the public API Gateway Endpoint to your local service.
+
