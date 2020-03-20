@@ -11,4 +11,4 @@ ProxyTea is based on two connected components:
 - Proxy: A simple AWS Stack, including an API Gateway and an SQS Queue.
 - Tea: a command line tool to run locally, pulling requests from the SQS Queue and forwarding them to your local service.
 
-![](resources/PRoxyTea.png)
+![ProxyTea](resources/PRoxyTea.png)
