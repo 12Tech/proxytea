@@ -21,7 +21,7 @@ You can follow the official instructions at [AWS](https://docs.aws.amazon.com/cl
 
 
 
-## How to deploy?
+## How to deploy Proxy?
 
 An S3 bucket to store the deployment code is required.
 
@@ -33,7 +33,7 @@ $> sam deploy --debug --s3-bucket DEPLOYMENT_BUCKET --force-upload --stack-name 
 
 Once the stack is correctly deployed, the API Gateway Endpoint will be shown.
 
-## How to use it?
+## How to use Tea?
 
 ```sh
 $> cd proxytea/src/pytea
