@@ -28,5 +28,5 @@ An S3 bucket to store the deployment code is required.
 ```sh
 $> git clone git@github.com:12Tech/proxytea.git
 $> cd proxytea/src/proxy
-$> sam deploy --debug --s3-bucket DEPLOYMENT_BUCKET --force-upload --stack-name proxytea
+$> sam deploy --debug --s3-bucket DEPLOYMENT_BUCKET --force-upload --stack-name YOUR_STACK_NAME
 ```
