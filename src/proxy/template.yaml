@@ -31,6 +31,7 @@ Resources:
       Environment:
         Variables:
           SQS_URL: !Ref ProxyTeaSQSQueue
+          BUCKET_NAME: !Ref TempS3Bucket
       Events:
 
         ForwardGET:
