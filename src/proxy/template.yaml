@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  proxy
+
+  Sample SAM Template for proxy
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Stage for development
+    Default: nonlive
+    AllowedValues:
+      - nonlive
+      - live
+
+Resources:
+
+  ForwardFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: forward/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Timeout: 30
+      Environment:
+        Variables:
+          SQS_URL: !Ref ProxyTeaSQSQueue
+      Events:
+        ForwardGET:
+          Type: Api
+          Properties:
+            Path: /{path+}
+            Method: get
+        ForwardPOST:
+          Type: Api
+          Properties:
+            Path: /{path+}
+            Method: post
+        ForwardPOST:
+          Type: Api
+          Properties:
+            Path: /{path+}
+            Method: put
+        ForwardPATCH:
+          Type: Api
+          Properties:
+            Path: /{path+}
+            Method: patch
+        ForwardDELETE:
+          Type: Api
+          Properties:
+            Path: /{path+}
+            Method: delete
+
+
+
+  PublishToSQS:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref ForwardFunctionRole
+      PolicyName: SendMessages
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sqs:SendMessage
+              - sqs:ChangeMessageVisibility
+            Resource:
+              - !GetAtt ProxyTeaSQSQueue.Arn
+
+  TempS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Join [ "", [ !Ref "AWS::AccountId", "-temp-", !Ref "Stage", ".proxytea.io" ] ]
+
+
+  ProxyTeaSQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Join [ "", [ !Ref "AWS::AccountId", "-ProxyTeaQueue-", !Ref "Stage", ".fifo" ] ]
+      FifoQueue: true
+      VisibilityTimeout: 300
+      ContentBasedDeduplication: true
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  ForwardApi:
+    Description: "API Gateway endpoint URL for Prod stage for Forward function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", "ForwardApi" ] ]
+  ForwardFunctionFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt ForwardFunction.Arn
+  ForwardFunctionIamRole:
+    Description: "Implicit IAM Role created for Forward function"
+    Value: !GetAtt ForwardFunctionRole.Arn
+  ProxyTeaSQSUrl:
+    Description: "SQS Url"
+    Value: !Ref ProxyTeaSQSQueue
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", "ProxyTeaSQSUrl" ] ]
