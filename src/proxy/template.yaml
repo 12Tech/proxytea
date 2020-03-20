@@ -32,27 +32,57 @@ Resources:
         Variables:
           SQS_URL: !Ref ProxyTeaSQSQueue
       Events:
+
         ForwardGET:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+        ForwardGETWith:
           Type: Api
           Properties:
             Path: /{path+}
             Method: get
+
         ForwardPOST:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post
+        ForwardPOSTWith:
           Type: Api
           Properties:
             Path: /{path+}
             Method: post
-        ForwardPOST:
+
+        ForwardPUT:
+          Type: Api
+          Properties:
+            Path: /
+            Method: put
+        ForwardPUTWith:
           Type: Api
           Properties:
             Path: /{path+}
             Method: put
+
         ForwardPATCH:
+          Type: Api
+          Properties:
+            Path: /
+            Method: patch
+        ForwardPATCHWith:
           Type: Api
           Properties:
             Path: /{path+}
             Method: patch
+
         ForwardDELETE:
+          Type: Api
+          Properties:
+            Path: /
+            Method: delete
+        ForwardDELETEWith:
           Type: Api
           Properties:
             Path: /{path+}
