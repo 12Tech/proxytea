@@ -1,12 +1,14 @@
 import argparse
 import json
 import traceback
+from urllib.parse import urlparse
 
 from requests import Request, Session
 
 import boto3
 
 sqs = boto3.resource('sqs')
+s3_client = boto3.client('s3')
 
 
 def read_messages_from_queue(queue):
@@ -26,6 +28,22 @@ def compose_request(message, url):
     return from_event_to_request(event, url)
 
 
+def load_body(s3_url: str) -> bytes:
+
+    parsed = urlparse(s3_url)
+    bucket_name = parsed.netloc
+    object_key = parsed.path[1:]
+
+    print(bucket_name, object_key)
+
+    response = s3_client.get_object(
+        Bucket=bucket_name,
+        Key=object_key
+    )
+
+    return response['Body'].read()
+
+
 def from_event_to_request(event, url):
 
     method = event['httpMethod']
@@ -33,8 +51,9 @@ def from_event_to_request(event, url):
     url = f"{url}{path}"
     headers = event['headers']
     body = event.get('body')
+
     if body is not None:
-        body = body.encode('utf-8')
+        body = load_body(body)
 
     r = Request(method, url, headers, data=body)
 
