@@ -14,7 +14,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
 )
@@ -55,22 +54,10 @@ func parseBody(body string) ApiGatewayEvent {
 	return parsedBody
 }
 
-func s3GetObject(svc s3iface.S3API, params *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
-	result, err := svc.GetObject(params)
-	if err != nil {
-		panic(err)
-		log.Printf("ERROR: unable to get: %s from: %s, %v", *params.Key, *params.Bucket, err)
-		return nil, err
-	}
-	return result, nil
-}
+func LoadBody(s3Url string) []byte {
 
-func LoadBody(s3Url string) ([]byte, error) {
-	// Creates new S3 session.
 	s3Client := s3.New(session.New())
-	// Create a placeholder buffer.
 	buf := bytes.NewBuffer(nil)
-	// Create GetObjectInput
 
 	urlObject, err := url.Parse(s3Url)
 	if err != nil {
@@ -85,16 +72,17 @@ func LoadBody(s3Url string) ([]byte, error) {
 		Key:    aws.String(object_key),
 	}
 
-	req, err := s3GetObject(s3Client, params)
+	req, err := s3Client.GetObject(params)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	defer req.Body.Close()
 
+	defer req.Body.Close()
 	if _, err := io.Copy(buf, req.Body); err != nil {
-		return nil, err
+		panic(err)
 	}
-	return buf.Bytes(), nil
+
+	return buf.Bytes()
 }
 
 func FromEventToRequest(event ApiGatewayEvent, service string) *http.Request {
@@ -109,10 +97,7 @@ func FromEventToRequest(event ApiGatewayEvent, service string) *http.Request {
 
 	if body != nil {
 		s3Url := *body
-		requestBody, err := LoadBody(s3Url)
-		if err != nil {
-			panic(err)
-		}
+		requestBody := LoadBody(s3Url)
 		req, err = http.NewRequest(method, url, bytes.NewBuffer(requestBody))
 	} else {
 		req, err = http.NewRequest(method, url, nil)
