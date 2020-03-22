@@ -5,12 +5,16 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
 )
@@ -51,6 +55,50 @@ func parseBody(body string) ApiGatewayEvent {
 	return parsedBody
 }
 
+// s3GetObject requires a s3 client and a s3 GetObjectInput. s3GetObject
+// will return an error if it fails to get the given asset from the target
+// bucket.
+func s3GetObject(svc s3iface.S3API, params *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
+	result, err := svc.GetObject(params)
+	if err != nil {
+		log.Printf("ERROR: unable to get: %s from: %s, %v", *params.Key, *params.Bucket, err)
+		return nil, err
+	}
+	return result, nil
+}
+
+func LoadBody(s3Url string) ([]byte, error) {
+	// Creates new S3 session.
+	svc := s3.New(session.New())
+	// Create a placeholder buffer.
+	buf := bytes.NewBuffer(nil)
+	// Create GetObjectInput
+
+	urlObject, err := url.Parse(s3Url)
+	if err != nil {
+		panic(err)
+	}
+
+	bucket_name := urlObject.Host
+	object_key := urlObject.Path[1:]
+
+	params := &s3.GetObjectInput{
+		Bucket: aws.String(bucket_name),
+		Key:    aws.String(object_key),
+	}
+
+	req, err := s3GetObject(svc, params)
+	if err != nil {
+		return nil, err
+	}
+	defer req.Body.Close()
+
+	if _, err := io.Copy(buf, req.Body); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 func FromEventToRequest(event ApiGatewayEvent, service string) *http.Request {
 
 	method := strings.ToUpper(event.HttpMethod)
@@ -62,7 +110,12 @@ func FromEventToRequest(event ApiGatewayEvent, service string) *http.Request {
 	var err error
 
 	if body != nil {
-		req, err = http.NewRequest(method, url, bytes.NewBuffer([]byte(*body)))
+		s3Url := *body
+		requestBody, err := LoadBody(s3Url)
+		if err != nil {
+			panic(err)
+		}
+		req, err = http.NewRequest(method, url, bytes.NewBuffer(requestBody))
 	} else {
 		req, err = http.NewRequest(method, url, nil)
 	}
