@@ -55,12 +55,10 @@ func parseBody(body string) ApiGatewayEvent {
 	return parsedBody
 }
 
-// s3GetObject requires a s3 client and a s3 GetObjectInput. s3GetObject
-// will return an error if it fails to get the given asset from the target
-// bucket.
 func s3GetObject(svc s3iface.S3API, params *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
 	result, err := svc.GetObject(params)
 	if err != nil {
+		panic(err)
 		log.Printf("ERROR: unable to get: %s from: %s, %v", *params.Key, *params.Bucket, err)
 		return nil, err
 	}
@@ -69,7 +67,7 @@ func s3GetObject(svc s3iface.S3API, params *s3.GetObjectInput) (*s3.GetObjectOut
 
 func LoadBody(s3Url string) ([]byte, error) {
 	// Creates new S3 session.
-	svc := s3.New(session.New())
+	s3Client := s3.New(session.New())
 	// Create a placeholder buffer.
 	buf := bytes.NewBuffer(nil)
 	// Create GetObjectInput
@@ -87,7 +85,7 @@ func LoadBody(s3Url string) ([]byte, error) {
 		Key:    aws.String(object_key),
 	}
 
-	req, err := s3GetObject(svc, params)
+	req, err := s3GetObject(s3Client, params)
 	if err != nil {
 		return nil, err
 	}
