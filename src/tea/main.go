@@ -17,6 +17,7 @@ import (
 
 var queueUrl string
 var service string
+var version string
 
 type ApiGatewayEvent struct {
 	HttpMethod string            `json:"httpMethod"`

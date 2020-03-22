@@ -3,9 +3,9 @@ VERSION := $(shell git describe)
 .PHONY: clean build
 
 build: clean
-	GOOS=darwin GOARCH=amd64 go build  -o bin/tea.darwin -ldflags="-s -w -X 'main.queueUrl=${VERSION}'" ./main.go
-	GOOS=linux GOARCH=amd64 go build  -o bin/tea.linux -ldflags="-s -w -X 'main.queueUrl=${VERSION}'" ./main.go
-
+	GOOS=darwin GOARCH=amd64 go build  -o bin/tea.darwin -ldflags="-s -w -X 'main.version=${VERSION}'" ./main.go
+	GOOS=linux GOARCH=amd64 go build  -o bin/tea.linux -ldflags="-s -w -X 'main.version=${VERSION}'" ./main.go
+	GOOS=windows GOARCH=amd64 go build  -o bin/tea.win -ldflags="-s -w -X 'main.version=${VERSION}'" ./main.go
 clean:
 	rm -rf ./bin
 
