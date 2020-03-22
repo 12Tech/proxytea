@@ -5,12 +5,15 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
 )
@@ -51,6 +54,37 @@ func parseBody(body string) ApiGatewayEvent {
 	return parsedBody
 }
 
+func LoadBody(s3Url string) []byte {
+
+	s3Client := s3.New(session.New())
+	buf := bytes.NewBuffer(nil)
+
+	urlObject, err := url.Parse(s3Url)
+	if err != nil {
+		panic(err)
+	}
+
+	bucket_name := urlObject.Host
+	object_key := urlObject.Path[1:]
+
+	params := &s3.GetObjectInput{
+		Bucket: aws.String(bucket_name),
+		Key:    aws.String(object_key),
+	}
+
+	req, err := s3Client.GetObject(params)
+	if err != nil {
+		panic(err)
+	}
+
+	defer req.Body.Close()
+	if _, err := io.Copy(buf, req.Body); err != nil {
+		panic(err)
+	}
+
+	return buf.Bytes()
+}
+
 func FromEventToRequest(event ApiGatewayEvent, service string) *http.Request {
 
 	method := strings.ToUpper(event.HttpMethod)
@@ -62,7 +96,9 @@ func FromEventToRequest(event ApiGatewayEvent, service string) *http.Request {
 	var err error
 
 	if body != nil {
-		req, err = http.NewRequest(method, url, bytes.NewBuffer([]byte(*body)))
+		s3Url := *body
+		requestBody := LoadBody(s3Url)
+		req, err = http.NewRequest(method, url, bytes.NewBuffer(requestBody))
 	} else {
 		req, err = http.NewRequest(method, url, nil)
 	}
