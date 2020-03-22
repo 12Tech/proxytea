@@ -111,7 +111,6 @@ func userWorker() {
 			// Delete message
 			for _, message := range receive_resp.Messages {
 
-				// TODO: Forward message to service
 				body := message.Body
 				parsedBody := parseBody(*body)
 
