@@ -31,28 +31,59 @@ Resources:
       Environment:
         Variables:
           SQS_URL: !Ref ProxyTeaSQSQueue
+          BUCKET_NAME: !Ref TempS3Bucket
       Events:
+
         ForwardGET:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+        ForwardGETWith:
           Type: Api
           Properties:
             Path: /{path+}
             Method: get
+
         ForwardPOST:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post
+        ForwardPOSTWith:
           Type: Api
           Properties:
             Path: /{path+}
             Method: post
-        ForwardPOST:
+
+        ForwardPUT:
+          Type: Api
+          Properties:
+            Path: /
+            Method: put
+        ForwardPUTWith:
           Type: Api
           Properties:
             Path: /{path+}
             Method: put
+
         ForwardPATCH:
+          Type: Api
+          Properties:
+            Path: /
+            Method: patch
+        ForwardPATCHWith:
           Type: Api
           Properties:
             Path: /{path+}
             Method: patch
+
         ForwardDELETE:
+          Type: Api
+          Properties:
+            Path: /
+            Method: delete
+        ForwardDELETEWith:
           Type: Api
           Properties:
             Path: /{path+}
@@ -75,6 +106,11 @@ Resources:
               - sqs:ChangeMessageVisibility
             Resource:
               - !GetAtt ProxyTeaSQSQueue.Arn
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Join [ '/' , [ !GetAtt TempS3Bucket.Arn, "*"]]
 
   TempS3Bucket:
     Type: AWS::S3::Bucket
