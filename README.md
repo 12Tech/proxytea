@@ -38,12 +38,23 @@ Once the stack is correctly deployed, the API Gateway Endpoint will be shown.
 
 ### Golang
 
+#### Download
+
+Download it from the latest [release](https://github.com/12Tech/proxytea/releases) available.
+
 ```sh
-$> cd proxytea/src/tea
-$> go build -v -o tea ./main.go
 $> ./tea --help
 $> ./tea -service http://YOUR_LOCAL_SERVICE:PORT -queueUrl https://QUEUE_URL
 
+```
+
+#### Build
+
+Or build
+
+```sh
+$> cd proxytea/src/tea
+$> go build -v -o tea ./main.go
 ```
 
 ### Python
