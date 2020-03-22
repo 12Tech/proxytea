@@ -35,6 +35,19 @@ Once the stack is correctly deployed, the API Gateway Endpoint will be shown.
 
 ## How to use it?
 
+
+### Golang
+
+```sh
+$> cd proxytea/src/tea
+$> go build -v -o tea ./main.go
+$> ./tea --help
+$> ./tea -service http://YOUR_LOCAL_SERVICE:PORT -queueUrl https://QUEUE_URL
+
+```
+
+### Python
+
 ```sh
 $> cd proxytea/src/pytea
 $> python tea.py -u http://YOUR_LOCAL_SERVICE:PORT -q https://QUEUE_URL
