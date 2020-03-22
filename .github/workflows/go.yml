@@ -33,5 +33,6 @@ jobs:
 
     - name: Build
       run: |
+        export VERSION=`git describe`
         cd src/tea
-        go build -v .
+        go build  -v -ldflags="-s -w -X 'main.version=${VERSION}'" ./main.go
