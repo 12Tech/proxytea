@@ -19,6 +19,10 @@ Parameters:
       - nonlive
       - live
 
+  Uuid:
+    Type: String
+    Description: Unique prefix
+
 Resources:
 
   ForwardFunction:
@@ -37,56 +41,56 @@ Resources:
         ForwardGET:
           Type: Api
           Properties:
-            Path: /
+            Path: /{uuid}
             Method: get
         ForwardGETWith:
           Type: Api
           Properties:
-            Path: /{path+}
+            Path: /{uuid}/{path+}
             Method: get
 
         ForwardPOST:
           Type: Api
           Properties:
-            Path: /
+            Path: /{uuid}
             Method: post
         ForwardPOSTWith:
           Type: Api
           Properties:
-            Path: /{path+}
+            Path: /{uuid}/{path+}
             Method: post
 
         ForwardPUT:
           Type: Api
           Properties:
-            Path: /
+            Path: /{uuid}
             Method: put
         ForwardPUTWith:
           Type: Api
           Properties:
-            Path: /{path+}
+            Path: /{uuid}/{path+}
             Method: put
 
         ForwardPATCH:
           Type: Api
           Properties:
-            Path: /
+            Path: /{uuid}
             Method: patch
         ForwardPATCHWith:
           Type: Api
           Properties:
-            Path: /{path+}
+            Path: /{uuid}/{path+}
             Method: patch
 
         ForwardDELETE:
           Type: Api
           Properties:
-            Path: /
+            Path: /{uuid}
             Method: delete
         ForwardDELETEWith:
           Type: Api
           Properties:
-            Path: /{path+}
+            Path: /{uuid}/{path+}
             Method: delete
 
 
