@@ -23,10 +23,11 @@ var service string
 var version string
 
 type ApiGatewayEvent struct {
-	HttpMethod string            `json:"httpMethod"`
-	Path       string            `json:"path"`
-	Headers    map[string]string `json:"headers"`
-	Body       *string           `json:"body"`
+	HttpMethod     string            `json:"httpMethod"`
+	Path           string            `json:"path"`
+	Headers        map[string]string `json:"headers"`
+	PathParameters map[string]string `json:"pathParameters"`
+	Body           *string           `json:"body"`
 }
 
 func getSqsClient() sqsiface.SQSAPI {
